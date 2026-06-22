@@ -7,8 +7,9 @@ def init_db():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS students (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        age INTEGER
+        name TEXT NOT NULL,
+        age INTEGER NOT NULL,
+        score REAL NOT NULL
     )
     """)
 
