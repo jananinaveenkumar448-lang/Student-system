@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, flash
-import sqlite3
 import requests
-from models.db import init_db
+from models.db import init_db, add_student, get_all_students, delete_student_by_id
 
 app = Flask(__name__)
 app.secret_key = "secret123"
@@ -9,7 +8,6 @@ app.secret_key = "secret123"
 init_db()
 
 
-# ---------------- API ----------------
 def get_quote():
     try:
         res = requests.get("https://api.quotable.io/random", timeout=5)
@@ -20,22 +18,14 @@ def get_quote():
     return "Keep learning and never give up!"
 
 
-# ---------------- HOME ----------------
 @app.route("/")
 def home():
-    conn = sqlite3.connect("students.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM students")
-    students = cursor.fetchall()
-    conn.close()
-
+    students = get_all_students()
     return render_template("add_student.html", students=students)
 
 
-# ---------------- ADD ----------------
 @app.route("/add", methods=["POST"])
-def add_student():
-
+def add():
     name = request.form.get("name")
     age = request.form.get("age")
     score = request.form.get("score")
@@ -51,62 +41,27 @@ def add_student():
         flash("Age and Score must be numbers", "danger")
         return redirect("/")
 
-    conn = sqlite3.connect("students.db")
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        INSERT INTO students (name, age, score)
-        VALUES (?, ?, ?)
-    """, (name, age, score))
-
-    conn.commit()
-    conn.close()
+    add_student(name, age, score)
 
     flash("Student added successfully!", "success")
     return redirect("/")
 
 
-# ---------------- DELETE ----------------
 @app.route("/delete/<int:id>")
-def delete_student(id):
-
-    conn = sqlite3.connect("students.db")
-    cursor = conn.cursor()
-
-    cursor.execute("DELETE FROM students WHERE id=?", (id,))
-
-    conn.commit()
-    conn.close()
-
+def delete(id):
+    delete_student_by_id(id)
     flash("Student deleted!", "warning")
     return redirect("/")
 
 
-# ---------------- LEADERBOARD ----------------
 @app.route("/leaderboard")
 def leaderboard():
-
-    conn = sqlite3.connect("students.db")
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT * FROM students
-        ORDER BY score DESC
-    """)
-
-    students = cursor.fetchall()
-    conn.close()
-
+    students = get_all_students()
     quote = get_quote()
 
-    return render_template(
-        "leaderboard.html",
-        students=students,
-        quote=quote
-    )
+    return render_template("leaderboard.html", students=students, quote=quote)
 
 
-# ---------------- ERROR PAGES ----------------
 @app.errorhandler(404)
 def not_found(e):
     return render_template("404.html"), 404
@@ -117,6 +72,5 @@ def server_error(e):
     return render_template("500.html"), 500
 
 
-# ---------------- RUN ----------------
 if __name__ == "__main__":
     app.run(debug=True)
