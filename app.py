@@ -15,7 +15,6 @@ app.secret_key = "secret123"
 
 init_db()
 
-
 # ---------------- HELPERS ----------------
 
 def get_quote():
@@ -29,20 +28,15 @@ def get_quote():
 
 
 def save_to_csv(name, age, score):
-    """
-    Automatically append student data into CSV file
-    """
     file_exists = os.path.isfile("students.csv")
 
     with open("students.csv", "a", newline="") as file:
         writer = csv.writer(file)
 
-        # Write header only once
         if not file_exists:
             writer.writerow(["Name", "Age", "Score"])
 
         writer.writerow([name, age, score])
-
 
 # ---------------- ROUTES ----------------
 
@@ -69,10 +63,7 @@ def add():
         flash("Age and Score must be numbers", "danger")
         return redirect("/")
 
-    # Save to SQLite
     add_student(name, age, score)
-
-    # Save to CSV (NEW FEATURE)
     save_to_csv(name, age, score)
 
     flash("Student added successfully!", "success")
@@ -90,7 +81,6 @@ def delete(id):
 def leaderboard():
     students = get_all_students()
     quote = get_quote()
-
     return render_template("leaderboard.html", students=students, quote=quote)
 
 
@@ -105,8 +95,6 @@ def not_found(e):
 def server_error(e):
     return render_template("500.html"), 500
 
-
-# ---------------- MAIN ----------------
 
 if __name__ == "__main__":
     app.run(debug=True)
