@@ -1,12 +1,22 @@
-from flask import Flask, render_template, request, redirect, flash
+import csv
+import os
 import requests
-from models.db import init_db, add_student, get_all_students, delete_student_by_id
+
+from flask import Flask, render_template, request, redirect, flash
+from models.db import (
+    init_db,
+    add_student,
+    get_all_students,
+    delete_student_by_id
+)
 
 app = Flask(__name__)
 app.secret_key = "secret123"
 
 init_db()
 
+
+# ---------------- HELPERS ----------------
 
 def get_quote():
     try:
@@ -17,6 +27,24 @@ def get_quote():
         pass
     return "Keep learning and never give up!"
 
+
+def save_to_csv(name, age, score):
+    """
+    Automatically append student data into CSV file
+    """
+    file_exists = os.path.isfile("students.csv")
+
+    with open("students.csv", "a", newline="") as file:
+        writer = csv.writer(file)
+
+        # Write header only once
+        if not file_exists:
+            writer.writerow(["Name", "Age", "Score"])
+
+        writer.writerow([name, age, score])
+
+
+# ---------------- ROUTES ----------------
 
 @app.route("/")
 def home():
@@ -41,7 +69,11 @@ def add():
         flash("Age and Score must be numbers", "danger")
         return redirect("/")
 
+    # Save to SQLite
     add_student(name, age, score)
+
+    # Save to CSV (NEW FEATURE)
+    save_to_csv(name, age, score)
 
     flash("Student added successfully!", "success")
     return redirect("/")
@@ -62,6 +94,8 @@ def leaderboard():
     return render_template("leaderboard.html", students=students, quote=quote)
 
 
+# ---------------- ERROR HANDLERS ----------------
+
 @app.errorhandler(404)
 def not_found(e):
     return render_template("404.html"), 404
@@ -71,6 +105,8 @@ def not_found(e):
 def server_error(e):
     return render_template("500.html"), 500
 
+
+# ---------------- MAIN ----------------
 
 if __name__ == "__main__":
     app.run(debug=True)
