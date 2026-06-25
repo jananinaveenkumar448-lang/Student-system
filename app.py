@@ -1,90 +1,95 @@
-import csv
-import os
-import requests
-
-from flask import Flask, render_template, request, redirect, flash
-from models.db import (
-    init_db,
-    add_student,
-    get_all_students,
-    delete_student_by_id
-)
+from flask import Flask, render_template, request, redirect, session, flash
+from models.db import *
 
 app = Flask(__name__)
 app.secret_key = "secret123"
 
 init_db()
-
-# ---------------- HELPERS ----------------
-
-def get_quote():
-    try:
-        res = requests.get("https://api.quotable.io/random", timeout=5)
-        if res.status_code == 200:
-            return res.json()["content"]
-    except:
-        pass
-    return "Keep learning and never give up!"
-
-
-def save_to_csv(name, age, score):
-    file_exists = os.path.isfile("students.csv")
-
-    with open("students.csv", "a", newline="") as file:
-        writer = csv.writer(file)
-
-        if not file_exists:
-            writer.writerow(["Name", "Age", "Score"])
-
-        writer.writerow([name, age, score])
-
-# ---------------- ROUTES ----------------
-
 @app.route("/")
 def home():
-    students = get_all_students()
-    return render_template("add_student.html", students=students)
+    if "user_id" in session:
+        return redirect("/dashboard")
+    return redirect("/login")
 
+@app.route("/register", methods=["GET", "POST"])
+def register():
+
+    if request.method == "POST":
+        success = add_user(request.form["username"], request.form["password"])
+
+        if success:
+            flash("Account created!", "success")
+            return redirect("/login")
+        else:
+            flash("Username already exists!", "danger")
+            return redirect("/register")
+
+    return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+
+        user = get_user(request.form["username"])
+
+        if user and user[2] == request.form["password"]:
+            session["user_id"] = user[0]
+            session["username"] = user[1]
+            return redirect("/dashboard")
+
+        flash("Invalid login", "danger")
+
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
+@app.route("/dashboard")
+def dashboard():
+
+    if "user_id" not in session:
+        return redirect("/login")
+
+    students = get_students(session["user_id"])
+
+    return render_template("dashboard.html", students=students)
 
 @app.route("/add", methods=["POST"])
 def add():
-    name = request.form.get("name")
-    age = request.form.get("age")
-    score = request.form.get("score")
 
-    if not name or not age or not score:
-        flash("All fields are required", "danger")
-        return redirect("/")
+    if "user_id" not in session:
+        return redirect("/login")
 
-    try:
-        age = int(age)
-        score = float(score)
-    except:
-        flash("Age and Score must be numbers", "danger")
-        return redirect("/")
+    add_student(
+        request.form["name"],
+        int(request.form["age"]),
+        float(request.form["test1"]),
+        float(request.form["test2"]),
+        float(request.form["test3"]),
+        session["user_id"]
+    )
 
-    add_student(name, age, score)
-    save_to_csv(name, age, score)
-
-    flash("Student added successfully!", "success")
-    return redirect("/")
-
+    return redirect("/dashboard")
 
 @app.route("/delete/<int:id>")
 def delete(id):
-    delete_student_by_id(id)
-    flash("Student deleted!", "warning")
-    return redirect("/")
 
+    delete_student(id)
+    return redirect("/dashboard")
 
 @app.route("/leaderboard")
 def leaderboard():
-    students = get_all_students()
-    quote = get_quote()
-    return render_template("leaderboard.html", students=students, quote=quote)
+
+    if "user_id" not in session:
+        return redirect("/login")
+
+    students = get_students(session["user_id"])
+
+    return render_template("leaderboard.html", students=students)
 
 
-# ---------------- ERROR HANDLERS ----------------
 
 @app.errorhandler(404)
 def not_found(e):

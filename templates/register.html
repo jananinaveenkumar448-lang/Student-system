@@ -7,22 +7,13 @@
 
 <div class="container card">
 
-<h2>Leaderboard</h2>
+<h2>Register</h2>
 
-<table>
-<tr>
-<th>Name</th>
-<th>Average</th>
-</tr>
-
-{% for s in students %}
-<tr>
-<td>{{ s[1] }}</td>
-<td>{{ s[6] }}</td>
-</tr>
-{% endfor %}
-
-</table>
+<form method="POST">
+<input name="username">
+<input name="password" type="password">
+<button>Register</button>
+</form>
 
 </div>
 

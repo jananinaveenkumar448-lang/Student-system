@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+
+<h2>Dashboard</h2>
+
+<a href="/logout">Logout</a>
+<a href="/leaderboard">Leaderboard</a>
+
+<div class="card">
+
+<h3>Add Student</h3>
+
+<form method="POST" action="/add">
+
+<input name="name" placeholder="Name">
+<input name="age" placeholder="Age">
+
+<input name="test1" placeholder="Test 1">
+<input name="test2" placeholder="Test 2">
+<input name="test3" placeholder="Test 3">
+
+<button>Add</button>
+
+</form>
+
+</div>
+
+<div class="card">
+
+<h3>Students</h3>
+
+<table>
+<tr>
+<th>Name</th>
+<th>T1</th>
+<th>T2</th>
+<th>T3</th>
+<th>Avg</th>
+</tr>
+
+{% for s in students %}
+<tr>
+<td>{{ s[1] }}</td>
+<td>{{ s[3] }}</td>
+<td>{{ s[4] }}</td>
+<td>{{ s[5] }}</td>
+<td>{{ s[6] }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+</div>
+
+</div>
+
+</body>
+</html>
