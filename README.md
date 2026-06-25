@@ -1,31 +1,31 @@
 # Student-system
-# 🎓 Student Performance Tracker
+#  Student Performance Tracker
 
 A Flask-based web application to manage student records, track performance, and export data using CSV.
 
 ---
 
-## 🚀 Project Overview
+##  Project Overview
 
 The Student Performance Tracker is a simple CRUD web application built using Flask and SQLite.  
 It allows users to add, view, and delete student records while also exporting data to a CSV file automatically.
 
 ---
 
-## ✨ Features
+##  Features
 
-- ➕ Add student (Name, Age, Score)
-- 📋 View all students
-- 🏆 Leaderboard page (performance ranking)
-- ❌ Delete student records
-- 📄 Automatic CSV file generation (`students.csv`)
-- 💬 Motivational quote API integration
-- ⚠️ Custom 404 and 500 error pages
-- 💾 SQLite database storage
+-  Add student (Name, Age, Score)
+-  View all students
+-  Leaderboard page (performance ranking)
+-  Delete student records
+-  Automatic CSV file generation (`students.csv`)
+-  Motivational quote API integration
+-  Custom 404 and 500 error pages
+-  SQLite database storage
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 - Python
 - Flask
@@ -36,7 +36,7 @@ It allows users to add, view, and delete student records while also exporting da
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 app.py
 students.db
 students.csv
@@ -48,7 +48,7 @@ tests/
 
 ---
 
-## ⚙️ Installation & Setup
+##  Installation & Setup
 
 ### 1. Clone the repository
 ```bash
